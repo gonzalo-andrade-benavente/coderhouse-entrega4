@@ -6,6 +6,7 @@ class Server {
     constructor() {
         this.PORT = process.env.PORT || 3000;
         this.app = express();
+        this.base = '/api/productos';
 
         this.middlewares();
         this.routes();
@@ -13,9 +14,13 @@ class Server {
 
     listen = () => {
 
-        this.app.listen(this.PORT, () => {
-            console.log(`Server listening in port ${this.PORT}`);
-        });
+        try {
+            this.app.listen(this.PORT, () => {
+                console.log(`Server listening in port ${this.PORT}`);
+            });
+        } catch(err) {
+            console.log(err);
+        }
     }
 
     middlewares = () => {
@@ -25,7 +30,7 @@ class Server {
     }
 
     routes = () => {
-        this.app.use('/api', require('../routes/router') );
+        this.app.use(this.base, require('../routes/router') );
     }
 
 

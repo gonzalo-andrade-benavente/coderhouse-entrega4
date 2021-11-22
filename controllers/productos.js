@@ -1,33 +1,21 @@
+const { response, request } = require("express");
+
 const productos = [];
 
-const getProductos = (req, res) => {
+const getProductos = (req , res = response) => {
 
     const tempProductoss = productos.filter(prd => prd.delete === false);
-    
-    /*
-    const productosRes = [];
-    
-    tempProductoss.forEach(prd => {
-        productosRes.push({
-           title: prd.title,
-           price: prd.price,
-           thumbnail: prd.thumbnail 
-        })
-    });
-    */
 
     res.json({
-        ok: true,
         total: tempProductoss.length,
-        msg: tempProductoss,
+        data: tempProductoss,
     });
 }
 
-const addProducto = (req, res) => {
+const addProducto = (req = request, res = response) => {
 
     const { title, price, thumbnail } = req.body;
-
-    const product = {
+    const producto = {
         title,
         price,
         thumbnail,
@@ -35,34 +23,73 @@ const addProducto = (req, res) => {
         delete: false
     }
 
-    productos.push(product);
+    productos.push(producto);
 
     res.json({
-        ok: true,
-        msg: product,
+        producto,
     });
 
 }
 
-const getProducto = (req, res) => {
+const getProducto = (req = request, res = response) => {
     const { id } = req.params;
-    const producto = productos.filter(prd => prd.id === Number(id));
+    const producto = productos.filter(prd => prd.id === Number(id) && prd.delete === false);
 
     if ( producto.length === 0) {
         return res.status(404).json({
-            ok: false,
-            msg: `El producto con identificador ${id} no se encuentra.`,
+            error : `El producto con identificador ${id} no se encuentra.`,
         });
     }
 
     res.status(200).json({
-        ok:true,
-        msg: producto[0],
+        producto: producto[0],
     });
 }
+
+const updateProducto = (req = request, res = response) => {
+    
+    const { id } = req.params;
+    const { title, price, thumbnail } = req.body;
+
+    const indexProducto = productos.findIndex(prd => prd.id === Number(id));
+
+    if ( indexProducto === -1) {
+        return res.status(404).json({
+            error : `El producto con identificador ${id} no se encuentra.`,
+        });
+    }
+
+    productos[indexProducto].title = title;
+    productos[indexProducto].price = price;
+    productos[indexProducto].thumbnail = thumbnail;
+
+    res.json({
+        producto: productos[indexProducto]
+    });
+}
+
+const deleteProducto = (req = request, res = response) => {
+    
+    const { id } = req.params;
+    const indexProducto = productos.findIndex(prd => prd.id === Number(id));
+
+    if ( indexProducto === -1) {
+        return res.status(404).json({
+            error : `El producto con identificador ${id} no se encuentra.`,
+        });
+    }
+
+    productos[indexProducto].delete = true;
+
+    res.json({
+        producto: productos[indexProducto]
+    });
+}   
 
 module.exports = {
     getProductos
     , addProducto
     , getProducto
+    , updateProducto
+    , deleteProducto
 }
